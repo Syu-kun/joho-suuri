@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17263d">
+<title>工業情報数理｜情報モラル 定期考査ゲーム</title>
+<style>
+:root{--navy:#17263d;--blue:#2d628c;--gold:#c7a25b;--bg:#f4f7fa;--card:#fff;--text:#17263d;--muted:#66758a;--ok:#1e7b4f;--ng:#b84444}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:linear-gradient(135deg,#eef3f7,#f9fafb);color:var(--text)}
+header{background:var(--navy);color:#fff;padding:22px 16px 18px;text-align:center;position:sticky;top:0;z-index:5;box-shadow:0 3px 15px #0002}
+header .tag{font-size:12px;letter-spacing:.12em;color:#d7e2ed} h1{font-size:clamp(22px,6vw,34px);margin:5px 0 4px} header p{margin:0;color:#dce5ed;font-size:13px}
+.wrap{max-width:760px;margin:auto;padding:18px 14px 40px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.badge{background:#fff;border:1px solid #dbe2e9;border-radius:999px;padding:7px 11px;font-size:13px;font-weight:700}
+.progress{height:9px;background:#dfe6ed;border-radius:99px;overflow:hidden;margin:10px 0 18px}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--gold));transition:.3s}
+.card{background:var(--card);border:1px solid #e0e6ec;border-radius:20px;padding:20px;box-shadow:0 8px 30px #1a2b3b10}
+.qnum{font-size:12px;color:var(--blue);font-weight:800;letter-spacing:.08em}.question{font-size:20px;line-height:1.6;font-weight:750;margin:10px 0 18px}
+.choices{display:grid;gap:10px}.choice{width:100%;border:2px solid #dce3e9;background:#fff;color:var(--text);padding:14px 15px;border-radius:14px;text-align:left;font-size:16px;cursor:pointer;transition:.15s}
+.choice:hover{border-color:#7897b0;transform:translateY(-1px)}.choice:disabled{cursor:default}.choice.correct{border-color:var(--ok);background:#eaf7f0}.choice.wrong{border-color:var(--ng);background:#fff0f0}
+.feedback{display:none;margin-top:16px;border-radius:15px;padding:14px 15px;line-height:1.65}.feedback.show{display:block}.feedback.ok{background:#eaf7f0;border:1px solid #b8dec9}.feedback.ng{background:#fff0f0;border:1px solid #e7b9b9}.feedback b{display:block;margin-bottom:5px}
+.actions{display:flex;gap:9px;margin-top:14px}.btn{border:0;border-radius:13px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:15px}.next{background:var(--navy);color:#fff;flex:1}.sub{background:#eef2f6;color:var(--navy)}
+#result{display:none}.score{font-size:52px;font-weight:900;text-align:center;margin:5px 0}.resultText{text-align:center;color:var(--muted);margin-bottom:18px}
+.review{display:grid;gap:10px}.reviewItem{border:1px solid #e0e6ec;border-radius:14px;padding:13px;background:#fafcfd}.reviewItem b{display:block;margin-bottom:5px}.reviewItem small{color:var(--muted);line-height:1.5}
+footer{text-align:center;color:#8a96a3;font-size:11px;margin-top:18px;line-height:1.6}
+.hidden{display:none!important}
+@media(max-width:480px){.wrap{padding:13px 10px 30px}.card{padding:16px;border-radius:17px}.question{font-size:18px}.choice{font-size:15px;padding:13px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="tag">工業高校1年｜工業情報数理</div>
+  <h1>情報モラル・情報社会<br>定期考査対策ゲーム</h1>
+  <p>用語＋場面判断で得点力をチェック！</p>
+</header>
+<main class="wrap">
+  <section id="game">
+    <div class="top">
+      <span class="badge" id="count">第1問 / 30</span>
+      <span class="badge" id="score">得点 0</span>
+    </div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="card">
+      <div class="qnum" id="category">QUESTION</div>
+      <div class="question" id="question"></div>
+      <div class="choices" id="choices"></div>
+      <div id="feedback" class="feedback"></div>
+      <div class="actions">
+        <button class="btn sub" id="restartBtn">最初から</button>
+        <button class="btn next hidden" id="nextBtn">次の問題 →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="result">
+    <div class="card">
+      <div class="qnum">RESULT</div>
+      <div class="score" id="finalScore"></div>
+      <div class="resultText" id="finalText"></div>
+      <div class="actions">
+        <button class="btn next" id="againBtn">もう一度挑戦</button>
+      </div>
+      <h3>間違えた問題</h3>
+      <div class="review" id="review"></div>
+    </div>
+  </section>
+  <footer>教材の「工業情報数理｜情報モラル・情報社会 テスト前学習プリント」の内容をもとに作成。<br>学校の実際の定期考査そのものではなく、対策用のオリジナル問題です。</footer>
+</main>
+
+<script>
+const DATA = [{"q": "氏名・住所・生年月日など、特定の個人を識別できる情報を何という？", "choices": ["個人情報", "プライバシー", "情報モラル", "肖像権"], "a": "個人情報", "e": "個人情報とは、氏名・住所・生年月日など、特定の個人を識別できる情報のこと。"}, {"q": "むやみに他人に知られたくない私生活上の情報や、その平穏を守る考え方は？", "choices": ["情報セキュリティ", "プライバシー", "著作権", "なりすまし"], "a": "プライバシー", "e": "プライバシーは、私生活上の情報などをむやみに知られたり干渉されたりしないことに関わる考え方。"}, {"q": "情報社会で、他者や社会に配慮しながら適切に行動するための考え方は？", "choices": ["情報モラル", "著作権", "マルウェア", "肖像権"], "a": "情報モラル", "e": "情報モラルは、情報社会で他者や社会に配慮して適切に行動するための考え方。"}, {"q": "文章・写真・音楽・イラストなどを作った人に認められる権利は？", "choices": ["肖像権", "著作権", "個人情報", "プライバシー"], "a": "著作権", "e": "著作権は、文章・写真・音楽・イラストなどの作品を作った人に認められる権利。"}, {"q": "自分の顔や姿を、みだりに撮影・公開されないことに関わる利益は？", "choices": ["著作権", "情報モラル", "肖像権", "情報セキュリティ"], "a": "肖像権", "e": "肖像権は、自分の顔や姿を無断で撮影・公開されないことに関わる利益。"}, {"q": "情報や機器を、事故・漏えい・攻撃などから守ることを何という？", "choices": ["情報セキュリティ", "デジタルタトゥー", "フェイクニュース", "生成AI"], "a": "情報セキュリティ", "e": "情報セキュリティは、情報や機器を事故・情報漏えい・攻撃などから守ること。"}, {"q": "偽サイトなどへ誘導し、ID・パスワード等を盗み取る手口は？", "choices": ["フィッシング", "なりすまし", "総当たり攻撃", "マルウェア"], "a": "フィッシング", "e": "フィッシングは、偽サイトなどへ誘導してID・パスワードなどの秘密情報を盗み取る手口。"}, {"q": "コンピュータやスマートフォンに害を与える悪意あるソフトウェアの総称は？", "choices": ["ランサムウェア", "マルウェア", "フェイクニュース", "フィッシング"], "a": "マルウェア", "e": "マルウェアは、コンピュータやスマートフォンなどに害を与える悪意あるソフトウェアの総称。"}, {"q": "ネット上に公開した情報が、完全には消えにくく残り続けることを何という？", "choices": ["デジタルタトゥー", "プライバシー", "なりすまし", "情報モラル"], "a": "デジタルタトゥー", "e": "削除した投稿でも、保存・転載・スクリーンショットなどによって残る可能性がある。これを意識する考え方がデジタルタトゥー。"}, {"q": "事実と異なる、または誤解を招く情報がニュースのように広がるものは？", "choices": ["生成AI", "フェイクニュース", "マルウェア", "肖像権"], "a": "フェイクニュース", "e": "フェイクニュースは、事実と異なる、または誤解を招く情報がニュースのように広がるもの。"}, {"q": "入力された指示をもとに、文章・画像など新しい内容を生成するAIは？", "choices": ["生成AI", "ハルシネーション", "情報モラル", "ランサムウェア"], "a": "生成AI", "e": "生成AIは、入力された指示をもとに文章・画像などの新しい内容を生成するAI。"}, {"q": "生成AIが、事実でない内容をもっともらしく作ってしまう現象は？", "choices": ["フィッシング", "ハルシネーション", "なりすまし", "デジタルタトゥー"], "a": "ハルシネーション", "e": "ハルシネーションは、生成AIが事実ではない内容を、もっともらしく生成してしまう現象。"}, {"q": "SNSの写真の背景から、駅名・店名・看板などを手がかりに推測される可能性があるものは？", "choices": ["投稿者の好きな教科", "場所", "パスワード", "著作権"], "a": "場所", "e": "背景に駅名・店名・看板・学校名などが写っていると、投稿した場所や生活圏を推測される可能性がある。"}, {"q": "SNSに毎日のように同じ時間帯の投稿を続けると、何を推測される可能性がある？", "choices": ["生活パターン", "著作権", "端末の製造番号", "AIの種類"], "a": "生活パターン", "e": "投稿した時刻や毎日の投稿から、「いつどこにいるか」など生活パターンを推測される可能性がある。"}, {"q": "友人の顔が写った写真をSNSに投稿するとき、まず確認すべきことは？", "choices": ["本人の許可", "写真の画質", "フォロワー数", "スマホの容量"], "a": "本人の許可", "e": "本人が公開を望んでいるとは限らないため、顔などが写った写真は本人の許可を確認する。肖像権・プライバシーへの配慮も必要。"}, {"q": "「明日から3日間家族旅行」と投稿することの問題点として最も適切なのは？", "choices": ["通信速度が下がる", "留守にする期間が推測される", "著作権が自動的に消える", "AIが使えなくなる"], "a": "留守にする期間が推測される", "e": "旅行中・家に誰もいないなどの情報は行動予定や留守の期間を伝えてしまう可能性がある。"}, {"q": "位置情報を直接書いていない写真なら、必ず安全である。", "choices": ["正しい", "誤り"], "a": "誤り", "e": "背景の駅名・店名・看板などから場所を推測できるため、位置情報を書いていなくても安全とは限らない。"}, {"q": "一度削除したSNS投稿は、絶対に誰からも見られなくなる。", "choices": ["正しい", "誤り"], "a": "誤り", "e": "他人に保存・転載・スクリーンショットされていれば残る可能性がある。デジタルタトゥーを意識しよう。"}, {"q": "鍵付きアカウントなら、投稿が保存・転送される可能性はゼロである。", "choices": ["正しい", "誤り"], "a": "誤り", "e": "公開範囲が狭くても、フォロワーによる保存・転送の可能性は残る。"}, {"q": "SMSを使ったフィッシングを何という？", "choices": ["スミッシング", "なりすまし", "総当たり攻撃", "ソーシャルエンジニアリング"], "a": "スミッシング", "e": "スミッシングはSMSを使ったフィッシング。宅配や料金未納などを装うことが多い。"}, {"q": "データを暗号化するなどして使用不能にし、金銭を要求する攻撃は？", "choices": ["ランサムウェア", "マルウェア", "フィッシング", "なりすまし"], "a": "ランサムウェア", "e": "ランサムウェアはデータを使用不能にするなどして、元に戻すことと引き換えに金銭を要求するタイプのマルウェア。"}, {"q": "他サービスから流出したID・パスワードの組合せを使い回してログインを試す攻撃は？", "choices": ["パスワードリスト攻撃", "総当たり攻撃", "フィッシング", "スミッシング"], "a": "パスワードリスト攻撃", "e": "他サービスから流出したID・パスワードの組合せを利用するのがパスワードリスト攻撃。使い回しを避けることが重要。"}, {"q": "多数の文字列を機械的に試して、パスワードを破ろうとする攻撃は？", "choices": ["総当たり攻撃", "なりすまし", "スミッシング", "晒し"], "a": "総当たり攻撃", "e": "総当たり攻撃は、考えられる多数の文字列を機械的に試してパスワードを破ろうとする攻撃。"}, {"q": "他人のアカウント・名前・画像などを使い、本人のように振る舞う行為は？", "choices": ["なりすまし", "著作権", "ランサムウェア", "ハルシネーション"], "a": "なりすまし", "e": "なりすましは、他人のアカウントや名前・画像などを使って本人のように振る舞う行為。"}, {"q": "人の心理や不注意につけ込み、会話や誘導で秘密情報を得る手口は？", "choices": ["ソーシャルエンジニアリング", "総当たり攻撃", "デジタルタトゥー", "フェイクニュース"], "a": "ソーシャルエンジニアリング", "e": "ソーシャルエンジニアリングは、技術だけでなく人の心理や不注意を利用して秘密情報を得る手口。"}, {"q": "怪しいメッセージに「24時間以内に手続きしないと停止されます」と書かれている。これは何に注意すべきサイン？", "choices": ["急がせる", "写真の画質", "著作権", "生活パターン"], "a": "急がせる", "e": "「今すぐ」「24時間以内」「停止されます」など、焦らせて冷静な確認をさせない表現は怪しいメッセージのポイント。"}, {"q": "メール内のリンクからではなく、公式アプリや公式サイトから確認するのがよい理由は？", "choices": ["実際のリンク先が偽サイトの可能性があるから", "通信量が必ずゼロになるから", "写真が自動保存されるから", "AIが回答してくれるから"], "a": "実際のリンク先が偽サイトの可能性があるから", "e": "表示文字と実際のリンク先が違う場合がある。公式アプリや公式サイトから自分で確認する方が安全。"}, {"q": "ID・パスワード・カード番号・認証コードを求めるメッセージが届いた。特に注意すべきことは？", "choices": ["認証コードを他人に教えない", "すぐ返信する", "全員に転送する", "同じパスワードを新しく作る"], "a": "認証コードを他人に教えない", "e": "認証コードは重要な秘密情報。怪しいメッセージで求められても他人に教えない。"}, {"q": "怪しいメッセージの日本語が自然なら、必ず安全だと判断してよい。", "choices": ["正しい", "誤り"], "a": "誤り", "e": "不自然な日本語は判断材料の一つだが、文章が自然でも安全とは限らない。送信元・URL・要求内容なども確認する。"}, {"q": "怪しいリンクを押してしまった・情報を入力してしまった場合、まず行うこととして適切なのは？", "choices": ["慌てて操作を続けず、接続や入力を止める", "同じリンクをもう一度押す", "友達全員に転送する", "認証コードを送る"], "a": "慌てて操作を続けず、接続や入力を止める", "e": "まず操作や入力を止め、信頼できる大人・担当者へ相談する。その後、パスワード変更や多要素認証などの対策を検討する。"}, {"q": "怪しいサイトにパスワードを入力してしまった。同じパスワードを使っている別サービスについても確認するべき？", "choices": ["はい", "いいえ"], "a": "はい", "e": "同じパスワードを使い回しているサービスも被害を受ける可能性があるため、確認・変更が重要。"}, {"q": "可能なら有効にするとよい、パスワードだけに頼らない認証方法は？", "choices": ["多要素認証", "スクリーンショット", "ハッシュタグ", "鍵付きアカウント"], "a": "多要素認証", "e": "多要素認証を有効にすると、パスワードが知られた場合でも別の認証要素を必要とでき、セキュリティを高められる。"}, {"q": "SNS投稿前のチェックとして不適切なものは？", "choices": ["学校名や住所などが写っていないか確認する", "友人の顔を本人の許可なく公開する", "行動予定や留守の情報を公開していないか確認する", "GPSなどの詳細情報を必要以上に公開しない"], "a": "友人の顔を本人の許可なく公開する", "e": "友人の顔・名札・制服などは、本人の許可なく公開しない。肖像権・プライバシーへの配慮が必要。"}];
+let qs=[], index=0, points=0, mistakes=[];
+const $=id=>document.getElementById(id);
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(){
+  qs=shuffle(DATA).slice(0, Math.min(30,DATA.length));
+  index=0;points=0;mistakes=[];
+  $("game").style.display="block"; $("result").style.display="none";
+  render();
+}
+function render(){
+  const item=qs[index];
+  $("count").textContent=`第${index+1}問 / ${qs.length}`;
+  $("score").textContent=`得点 ${points}`;
+  $("bar").style.width=`${index/qs.length*100}%`;
+  $("category").textContent=`QUESTION ${String(index+1).padStart(2,"0")}`;
+  $("question").textContent=item.q;
+  const box=$("choices"); box.innerHTML="";
+  shuffle(item.choices).forEach(c=>{
+    const b=document.createElement("button"); b.className="choice"; b.textContent=c;
+    b.onclick=()=>answer(b,c,item); box.appendChild(b);
+  });
+  $("feedback").className="feedback"; $("feedback").innerHTML="";
+  $("nextBtn").classList.add("hidden");
+}
+function answer(button, chosen, item){
+  document.querySelectorAll(".choice").forEach(b=>b.disabled=true);
+  const correct=chosen===item.a;
+  document.querySelectorAll(".choice").forEach(b=>{if(b.textContent===item.a)b.classList.add("correct")});
+  if(!correct){
+    button.classList.add("wrong");
+    mistakes.push({q:item.q,a:item.a,e:item.e,y:chosen});
+  }else{points++}
+  $("score").textContent=`得点 ${points}`;
+  const f=$("feedback");
+  f.className=`feedback show ${correct?"ok":"ng"}`;
+  f.innerHTML=`<b>${correct?"⭕ 正解！":"❌ 不正解"}</b>${correct?"":"正解は「"+escapeHtml(item.a)+"」です。"}<br>${escapeHtml(item.e)}`;
+  $("nextBtn").classList.remove("hidden");
+  $("bar").style.width=`${(index+1)/qs.length*100}%`;
+}
+function next(){
+  if(index<qs.length-1){index++;render()}else{finish()}
+}
+function finish(){
+  $("game").style.display="none";$("result").style.display="block";
+  const pct=Math.round(points/qs.length*100);
+  $("finalScore").textContent=`${points} / ${qs.length}`;
+  $("finalText").textContent=pct>=90?"すごい！定期考査でも高得点を狙える仕上がり！":pct>=70?"いい感じ！間違えた問題を復習して仕上げよう！":"まずは間違えた問題の解説をもう一度確認しよう！";
+  const r=$("review");r.innerHTML="";
+  if(!mistakes.length){r.innerHTML="<div class='reviewItem'>🎉 全問正解！復習する問題はありません。</div>";return}
+  mistakes.forEach((m,i)=>{
+    const d=document.createElement("div");d.className="reviewItem";
+    d.innerHTML=`<b>${i+1}. ${escapeHtml(m.q)}</b><small>あなたの答え：${escapeHtml(m.y)}<br>正解：${escapeHtml(m.a)}<br>解説：${escapeHtml(m.e)}</small>`;
+    r.appendChild(d);
+  });
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+$("nextBtn").onclick=next;$("restartBtn").onclick=start;$("againBtn").onclick=start;start();
+</script>
+</body>
+</html>
